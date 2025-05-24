@@ -1,7 +1,7 @@
 import sqlite3
 
-# Connect to database (creates file if it doesn't exist)
-conn = sqlite3.connect('simple_users.db')
+# Connect to (or create) the database
+conn = sqlite3.connect('users_plain.db')
 cursor = conn.cursor()
 
 # Create table if not exists
@@ -13,10 +13,11 @@ CREATE TABLE IF NOT EXISTS users (
 ''')
 conn.commit()
 
-# Register a new user
+# Register new user (stores password directly)
 def register():
-    username = input("Enter new username: ")
-    password = input("Enter new password: ")
+    username = input("Enter a new username: ")
+    password = input("Enter a new password: ")
+
     try:
         cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
@@ -24,12 +25,14 @@ def register():
     except sqlite3.IntegrityError:
         print("❌ Username already exists.")
 
-# Login existing user
+# Login existing user (compares directly stored passwords)
 def login():
     username = input("Enter username: ")
     password = input("Enter password: ")
+
     cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
-    if cursor.fetchone():
+    result = cursor.fetchone()
+    if result:
         print("✅ Login successful!")
     else:
         print("❌ Invalid username or password.")
@@ -46,6 +49,7 @@ def main():
         elif choice == '2':
             login()
         elif choice == '3':
+            print("Goodbye!")
             break
         else:
             print("❌ Invalid choice.")
@@ -53,3 +57,4 @@ def main():
 if __name__ == "__main__":
     main()
     conn.close()
+
